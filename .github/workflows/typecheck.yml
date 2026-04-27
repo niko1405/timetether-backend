@@ -2,7 +2,23 @@ name: TypeScript Typecheck
 
 on:
   push:
+    paths:
+      - 'src/**/*.mts'
+      - 'prisma/schema.prisma'
+      - 'prisma.config.ts'
+      - 'tsconfig.json'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/typecheck.yml'
   pull_request:
+    paths:
+      - 'src/**/*.mts'
+      - 'prisma/schema.prisma'
+      - 'prisma.config.ts'
+      - 'tsconfig.json'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/typecheck.yml'
 
 jobs:
   tsc:
