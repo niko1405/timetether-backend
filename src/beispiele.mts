@@ -24,7 +24,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { prismaQueryInsights } from '@prisma/sqlcommenter-query-insights';
 import {
     PrismaClient,
-    type Buch,
+    type AppProfile,
     type Prisma,
 } from './generated/prisma/client.ts';
 
@@ -52,7 +52,7 @@ const log: (Prisma.LogLevel | Prisma.LogDefinition)[] = [
 ];
 
 // PrismaClient passend zur Umgebungsvariable DATABASE_URL in ".env"
-// d.h. mit PostgreSQL-User "buch" und Schema "buch"
+// d.h. mit PostgreSQL-User fuer Schema "timetether"
 const prisma = new PrismaClient({
     // shorthand property
     adapter,
@@ -69,43 +69,38 @@ prisma.$on('query', (e) => {
     console.log(message);
 });
 
-export type BuchMitTitelUndAbbildungen = Prisma.BuchGetPayload<{
+export type ProfilMitConfigUndAvatar = Prisma.AppProfileGetPayload<{
     include: {
-        titel: true;
-        abbildungen: true;
+        trackingConfig: true;
+        profileAvatar: true;
     };
 }>;
 
-// Operationen mit dem Model "Buch"
+// Operationen mit dem Model "AppProfile"
 try {
     await prisma.$connect();
 
     // Das Resultat ist null, falls kein Datensatz gefunden
-    const buch: Buch | null = await prisma.buch.findUnique({
-        where: { id: 1 },
-    });
+    const buch: AppProfile | null = await prisma.appProfile.findFirst();
     message = styleText(['black', 'bgWhite'], 'buch');
     console.log(`${message} = %j`, buch);
     console.log();
 
     // SELECT *
-    // FROM   buch
-    // JOIN   titel ON buch.id = titel.buch_id
-    // WHERE  titel.titel LIKE "%n%"
-    const buecher: BuchMitTitelUndAbbildungen[] = await prisma.buch.findMany({
+    // FROM   app_profile
+    // JOIN   tracking_config/profile_avatar ueber profile_id
+    // WHERE  display_name LIKE "%n%"
+    const buecher: ProfilMitConfigUndAvatar[] = await prisma.appProfile.findMany({
         where: {
-            titel: {
-                // https://www.prisma.io/docs/orm/prisma-client/queries/filtering-and-sorting#filter-on-relations
-                titel: {
-                    // https://www.prisma.io/docs/orm/reference/prisma-client-reference#filter-conditions-and-operators
-                    contains: 'n',
-                },
+            displayName: {
+                // https://www.prisma.io/docs/orm/reference/prisma-client-reference#filter-conditions-and-operators
+                contains: 'n',
             },
         },
-        // Fetch-Join mit Titel und Abbildungen
+        // Fetch-Join mit Tracking-Config und Avatar
         include: {
-            titel: true,
-            abbildungen: true,
+            trackingConfig: true,
+            profileAvatar: true,
         },
     });
     message = styleText(['black', 'bgWhite'], 'buecherMitAbb');
@@ -113,19 +108,19 @@ try {
     console.log();
 
     // higher-order function und arrow function
-    const schlagwoerter = buecher.map((b) => b.schlagwoerter);
+    const schlagwoerter = buecher.map((b) => b.currentStreak);
     message = styleText(['black', 'bgWhite'], 'schlagwoerter');
     console.log(`${message} = %j`, schlagwoerter);
     console.log();
 
     // union type
-    const titel = buecher.map((b) => b.titel?.titel);
+    const titel = buecher.map((b) => b.trackingConfig?.dailyLimitMinutes);
     message = styleText(['black', 'bgWhite'], 'titel');
     console.log(`${message} = %j`, titel);
     console.log();
 
     // Pagination
-    const buecherPage2: Buch[] = await prisma.buch.findMany({
+    const buecherPage2: AppProfile[] = await prisma.appProfile.findMany({
         skip: 5,
         take: 5,
     });
@@ -142,12 +137,10 @@ const adapterAdmin = new PrismaPg({
 });
 const prismaAdmin = new PrismaClient({ adapter: adapterAdmin });
 try {
-    const buecherAdmin: Buch[] = await prismaAdmin.buch.findMany({
+    const buecherAdmin: AppProfile[] = await prismaAdmin.appProfile.findMany({
         where: {
-            titel: {
-                titel: {
-                    contains: 'n',
-                },
+            displayName: {
+                contains: 'n',
             },
         },
     });
