@@ -64,7 +64,7 @@ erDiagram
     APP_PROFILE ||--o{ SCREENTIME_LOG : contains
 ```
 
-## Entitaeten und Regeln
+## Entitäten und Regeln
 
 - AppProfile ist die zentrale Entitaet fuer Benutzerprofil und Basisstatus.
 - TrackingConfig ist 1:1 optional zu AppProfile (per unique profile_id).
@@ -72,7 +72,7 @@ erDiagram
 - ScreentimeLog ist 1:n zu AppProfile.
 - Fuer ScreentimeLog gilt zusaetzlich ein Unique-Constraint auf (profile_id, log_date).
 
-## Zukuenftige Roadmap (Post-Uni)
+## Zukünftige Roadmap
 
 - Social Accountability: Implementierung einer Friendship-Entitaet (m:n) fuer gegenseitige Kontrolle.
 - Multi-Device Support: Hinzufuegen einer Device-Entitaet, um Zeiten von iPad, iPhone und Mac zu differenzieren und zusammenzufuehren.
