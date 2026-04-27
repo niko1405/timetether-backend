@@ -18,10 +18,10 @@
 //
 //          bun --env-file=.env src\beispiele.mts
 
-import process from 'node:process';
-import { styleText } from 'node:util';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { prismaQueryInsights } from '@prisma/sqlcommenter-query-insights';
+import process from 'node:process';
+import { styleText } from 'node:util';
 import {
     PrismaClient,
     type AppProfile,

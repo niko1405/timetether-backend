@@ -19,6 +19,7 @@
 //           bun --env-file=.env src\beispiele-write.mts
 
 import { PrismaPg } from '@prisma/adapter-pg';
+import { randomUUID } from 'node:crypto';
 import process from 'node:process';
 import { styleText } from 'node:util';
 import { PrismaClient, type Prisma } from './generated/prisma/client.ts';
@@ -44,8 +45,7 @@ const log: (Prisma.LogLevel | Prisma.LogDefinition)[] = [
     'error',
 ];
 
-// PrismaClient fuer DB "buch" (siehe Umgebungsvariable DATABASE_URL in ".env")
-// d.h. mit PostgreSQL-User "buch" und Schema "buch"
+// PrismaClient fuer DB "timetether" (siehe Umgebungsvariable DATABASE_URL in ".env")
 const prisma = new PrismaClient({
     adapter,
     errorFormat: 'pretty',
@@ -58,86 +58,70 @@ prisma.$on('query', (e) => {
     console.log(message);
 });
 
-const neuesBuch: Prisma.BuchCreateInput = {
-    // Spaltentyp "text"
-    isbn: '978-0-007-00644-1',
-    // Spaltentyp "integer"
-    rating: 1,
-    // Spaltentyp "enum('HARDCOVER', ...)"
-    art: 'HARDCOVER',
-    // number -> Spaltentyp "numeric"
-    preis: 99.99,
-    rabatt: 0.0123,
-    // Spaltentyp "boolean"
-    lieferbar: true,
-    // Datum im Format ISO8601 fuer Spaltentyp "date"
-    datum: '2025-02-28T00:00:00Z',
-    homepage: 'https://beispiele.prisma',
-    // Spaltentyp "jsonb"
-    schlagwoerter: ['JAVASCRIPT', 'TYPESCRIPT'],
-    // 1:1-Beziehung
-    titel: {
+const neuesBuch: Prisma.AppProfileCreateInput = {
+    id: randomUUID(),
+    displayName: 'Beispiel',
+    statusMessage: 'beispiel',
+    timezone: 'Europe/Berlin',
+    onboardingCompleted: true,
+    // 1:1-Beziehung (unique profileId)
+    trackingConfig: {
         create: {
-            titel: 'Beispiel',
-            untertitel: 'beispiel',
+            dailyLimitMinutes: 120,
+            isPublic: false,
+            notificationsEnabled: true,
         },
     },
     // 1:N-Beziehung
-    abbildungen: {
+    screentimeLogs: {
         create: [
             {
-                beschriftung: 'Abb. 1',
-                contentType: 'img/png',
+                logDate: '2026-04-26T00:00:00Z',
+                totalMinutes: 99,
+                topApp: 'VS Code',
             },
         ],
     },
 };
-type BuchCreated = Prisma.BuchGetPayload<{
+type BuchCreated = Prisma.AppProfileGetPayload<{
     include: {
-        titel: true;
-        abbildungen: true;
+        trackingConfig: true;
+        screentimeLogs: true;
     };
 }>;
 
-const geaendertesBuch: Prisma.BuchUpdateInput = {
-    version: { increment: 1 },
-    rating: 5,
-    art: 'HARDCOVER',
-    preis: 3333,
-    rabatt: 0.033,
-    lieferbar: true,
-    // datum: '2025-03-03T00:00:00Z',
-    homepage: 'https://geaendert.put.rest',
-    schlagwoerter: ['JAVA'],
+const geaendertesBuch: Prisma.AppProfileUpdateInput = {
+    currentStreak: { increment: 1 },
+    displayName: 'Beispiel - geaendert',
+    statusMessage: 'geaendert',
 };
-type BuchUpdated = Prisma.BuchGetPayload<{}>; // eslint-disable-line @typescript-eslint/no-empty-object-type
+type BuchUpdated = Prisma.AppProfileGetPayload<{}>; // eslint-disable-line @typescript-eslint/no-empty-object-type
 
-// Schreib-Operationen mit dem Model "Buch"
+// Schreib-Operationen mit dem Model "AppProfile"
 try {
     await prisma.$connect();
     await prisma.$transaction(async (tx) => {
         // Neuer Datensatz mit generierter ID
-        const buchDb: BuchCreated = await tx.buch.create({
+        const buchDb: BuchCreated = await tx.appProfile.create({
             data: neuesBuch,
-            include: { titel: true, abbildungen: true }, //auch titel und abbildungen sollen angelegt werden --> CASCADE
+            include: { trackingConfig: true, screentimeLogs: true },
         });
         message = styleText(['black', 'bgWhite'], 'Generierte ID:');
         console.log(`${message} ${buchDb.id}`);
         console.log();
 
-        // Version +1 wegen "Optimistic Locking" bzw. Vermeidung von "Lost Updates"
-        const buchUpdated: BuchUpdated = await tx.buch.update({
+        const buchUpdated: BuchUpdated = await tx.appProfile.update({
             data: geaendertesBuch,
-            where: { id: 30 },
+            where: { id: buchDb.id },
         });
         // eslint-disable-next-line require-atomic-updates
-        message = styleText(['black', 'bgWhite'], 'Aktualisierte Version:');
-        console.log(`${message} ${buchUpdated.version}`);
+        message = styleText(['black', 'bgWhite'], 'Aktualisierter Streak:');
+        console.log(`${message} ${buchUpdated.currentStreak}`);
         console.log();
 
         // https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/referential-actions#referential-action-defaults
         // https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/relation-mode
-        const geloescht = await tx.buch.delete({ where: { id: 70 } });
+        const geloescht = await tx.appProfile.delete({ where: { id: buchDb.id } });
         // eslint-disable-next-line require-atomic-updates
         message = styleText(['black', 'bgWhite'], 'Geloescht:');
         console.log(`${message} ${geloescht.id}`);
