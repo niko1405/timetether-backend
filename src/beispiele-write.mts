@@ -58,7 +58,7 @@ prisma.$on('query', (e) => {
     console.log(message);
 });
 
-const neuesBuch: Prisma.AppProfileCreateInput = {
+const neuesProfil: Prisma.AppProfileCreateInput = {
     id: randomUUID(),
     displayName: 'Beispiel',
     statusMessage: 'beispiel',
@@ -83,48 +83,50 @@ const neuesBuch: Prisma.AppProfileCreateInput = {
         ],
     },
 };
-type BuchCreated = Prisma.AppProfileGetPayload<{
+type ProfilCreated = Prisma.AppProfileGetPayload<{
     include: {
         trackingConfig: true;
         screentimeLogs: true;
     };
 }>;
 
-const geaendertesBuch: Prisma.AppProfileUpdateInput = {
+const geaendertesProfil: Prisma.AppProfileUpdateInput = {
     currentStreak: { increment: 1 },
     displayName: 'Beispiel - geaendert',
     statusMessage: 'geaendert',
 };
-type BuchUpdated = Prisma.AppProfileGetPayload<{}>; // eslint-disable-line @typescript-eslint/no-empty-object-type
+type ProfilUpdated = Prisma.AppProfileGetPayload<{}>; // eslint-disable-line @typescript-eslint/no-empty-object-type
 
 // Schreib-Operationen mit dem Model "AppProfile"
 try {
     await prisma.$connect();
     await prisma.$transaction(async (tx) => {
         // Neuer Datensatz mit generierter ID
-        const buchDb: BuchCreated = await tx.appProfile.create({
-            data: neuesBuch,
+        const profilDb: ProfilCreated = await tx.appProfile.create({
+            data: neuesProfil,
             include: { trackingConfig: true, screentimeLogs: true },
         });
         message = styleText(['black', 'bgWhite'], 'Generierte ID:');
-        console.log(`${message} ${buchDb.id}`);
+        console.log(`${message} ${profilDb.id}`);
         console.log();
 
-        const buchUpdated: BuchUpdated = await tx.appProfile.update({
-            data: geaendertesBuch,
-            where: { id: buchDb.id },
+        const profilUpdated: ProfilUpdated = await tx.appProfile.update({
+            data: geaendertesProfil,
+            where: { id: profilDb.id },
         });
         // eslint-disable-next-line require-atomic-updates
         message = styleText(['black', 'bgWhite'], 'Aktualisierter Streak:');
-        console.log(`${message} ${buchUpdated.currentStreak}`);
+        console.log(`${message} ${profilUpdated.currentStreak}`);
         console.log();
 
         // https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/referential-actions#referential-action-defaults
         // https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/relation-mode
-        const geloescht = await tx.appProfile.delete({ where: { id: buchDb.id } });
+        const geloeschtesProfil = await tx.appProfile.delete({
+            where: { id: profilDb.id },
+        });
         // eslint-disable-next-line require-atomic-updates
-        message = styleText(['black', 'bgWhite'], 'Geloescht:');
-        console.log(`${message} ${geloescht.id}`);
+        message = styleText(['black', 'bgWhite'], 'Geloeschtes Profil:');
+        console.log(`${message} ${geloeschtesProfil.id}`);
     });
 } finally {
     await prisma.$disconnect();

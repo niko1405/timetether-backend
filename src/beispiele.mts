@@ -81,16 +81,16 @@ try {
     await prisma.$connect();
 
     // Das Resultat ist null, falls kein Datensatz gefunden
-    const buch: AppProfile | null = await prisma.appProfile.findFirst();
-    message = styleText(['black', 'bgWhite'], 'buch');
-    console.log(`${message} = %j`, buch);
+    const profil: AppProfile | null = await prisma.appProfile.findFirst();
+    message = styleText(['black', 'bgWhite'], 'profil');
+    console.log(`${message} = %j`, profil);
     console.log();
 
     // SELECT *
     // FROM   app_profile
     // JOIN   tracking_config/profile_avatar ueber profile_id
     // WHERE  display_name LIKE "%n%"
-    const buecher: ProfilMitConfigUndAvatar[] = await prisma.appProfile.findMany({
+    const profile: ProfilMitConfigUndAvatar[] = await prisma.appProfile.findMany({
         where: {
             displayName: {
                 // https://www.prisma.io/docs/orm/reference/prisma-client-reference#filter-conditions-and-operators
@@ -103,29 +103,29 @@ try {
             profileAvatar: true,
         },
     });
-    message = styleText(['black', 'bgWhite'], 'buecherMitAbb');
-    console.log(`${message} = %j`, buecher);
+    message = styleText(['black', 'bgWhite'], 'profileMitConfigUndAvatar');
+    console.log(`${message} = %j`, profile);
     console.log();
 
     // higher-order function und arrow function
-    const schlagwoerter = buecher.map((b) => b.currentStreak);
-    message = styleText(['black', 'bgWhite'], 'schlagwoerter');
-    console.log(`${message} = %j`, schlagwoerter);
+    const currentStreaks = profile.map((p) => p.currentStreak);
+    message = styleText(['black', 'bgWhite'], 'currentStreaks');
+    console.log(`${message} = %j`, currentStreaks);
     console.log();
 
     // union type
-    const titel = buecher.map((b) => b.trackingConfig?.dailyLimitMinutes);
-    message = styleText(['black', 'bgWhite'], 'titel');
-    console.log(`${message} = %j`, titel);
+    const taeglicheLimits = profile.map((p) => p.trackingConfig?.dailyLimitMinutes);
+    message = styleText(['black', 'bgWhite'], 'taeglicheLimits');
+    console.log(`${message} = %j`, taeglicheLimits);
     console.log();
 
     // Pagination
-    const buecherPage2: AppProfile[] = await prisma.appProfile.findMany({
+    const profileSeite2: AppProfile[] = await prisma.appProfile.findMany({
         skip: 5,
         take: 5,
     });
-    message = styleText(['black', 'bgWhite'], 'buecherPage2');
-    console.log(`${message} = %j`, buecherPage2);
+    message = styleText(['black', 'bgWhite'], 'profileSeite2');
+    console.log(`${message} = %j`, profileSeite2);
     console.log();
 } finally {
     await prisma.$disconnect();
@@ -137,15 +137,15 @@ const adapterAdmin = new PrismaPg({
 });
 const prismaAdmin = new PrismaClient({ adapter: adapterAdmin });
 try {
-    const buecherAdmin: AppProfile[] = await prismaAdmin.appProfile.findMany({
+    const profileAdmin: AppProfile[] = await prismaAdmin.appProfile.findMany({
         where: {
             displayName: {
                 contains: 'n',
             },
         },
     });
-    message = styleText(['black', 'bgWhite'], 'buecherAdmin');
-    console.log(`${message} = ${JSON.stringify(buecherAdmin)}`);
+    message = styleText(['black', 'bgWhite'], 'profileAdmin');
+    console.log(`${message} = ${JSON.stringify(profileAdmin)}`);
 } finally {
     await prismaAdmin.$disconnect();
 }
