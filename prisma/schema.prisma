@@ -1,0 +1,90 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["nativeDistinct", "relationJoins"]
+  engineType      = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["timetether"]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model AppProfile {
+  id                  String   @id @db.Uuid
+  displayName         String   @map("display_name")
+  avatarUrl           String?  @map("avatar_url") 
+  statusMessage       String?  @map("status_message")
+  timezone            String   @default("Europe/Berlin")
+  currentStreak       Int      @default(0) @map("current_streak")
+  onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
+  erzeugt             DateTime @default(now()) @db.Timestamp(6)
+  aktualisiert        DateTime @default(now()) @db.Timestamp(6)
+
+  // Relationen
+  profileAvatar       ProfileAvatar?   
+  screentimeLogs      ScreentimeLog[]  
+  trackingConfig      TrackingConfig?  
+
+  @@map("app_profile")
+  @@schema("timetether") // <-- Hier hinzugefügt
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ProfileAvatar {
+  id            Int      @id @default(autoincrement())
+  fileData      Bytes    @map("file_data")
+  filename      String
+  mimetype      String
+  fileSizeBytes Int      @map("file_size_bytes")
+  
+  profileId     String   @unique @db.Uuid @map("profile_id")
+  
+  erzeugt       DateTime @default(now()) @db.Timestamp(6)
+  aktualisiert  DateTime @default(now()) @db.Timestamp(6)
+  
+  appProfile    AppProfile @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([profileId])
+  @@map("profile_avatar")
+  @@schema("timetether") // <-- Hier hinzugefügt
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ScreentimeLog {
+  id            Int      @id @default(autoincrement())
+  logDate       DateTime @db.Date @map("log_date")
+  totalMinutes  Int      @map("total_minutes")
+  topApp        String?  @map("top_app")
+  
+  profileId     String   @db.Uuid @map("profile_id")
+  
+  erzeugt       DateTime @default(now()) @db.Timestamp(6)
+  aktualisiert  DateTime @default(now()) @db.Timestamp(6)
+  
+  appProfile    AppProfile @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([profileId, logDate])
+  @@index([profileId])
+  @@map("screentime_log")
+  @@schema("timetether") // <-- Hier hinzugefügt
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model TrackingConfig {
+  id                   Int      @id @default(autoincrement())
+  dailyLimitMinutes    Int      @default(120) @map("daily_limit_minutes")
+  isPublic             Boolean  @default(false) @map("is_public")
+  notificationsEnabled Boolean  @default(true) @map("notifications_enabled")
+  
+  profileId            String   @unique @db.Uuid @map("profile_id")
+  
+  erzeugt              DateTime @default(now()) @db.Timestamp(6)
+  aktualisiert         DateTime @default(now()) @db.Timestamp(6)
+  
+  appProfile           AppProfile @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  
+  @@map("tracking_config")
+  @@schema("timetether") // <-- Hier hinzugefügt
+}
