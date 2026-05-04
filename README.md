@@ -5,14 +5,7 @@ Die Kernidee ist es, nicht nur die eigene Bildschirmzeit zu erfassen, sondern di
 (kontrolliert) mit Freunden zu teilen, um sich gegenseitig bei der Reduzierung der Handy-Nutzung
 zu unterstuetzen.
 
-Dieses Repository bildet das fundamentale Backend und wurde initial als Modulprojekt im
-Sommersemester 2026 in Karlsruhe gestartet. Es ist so konzipiert, dass es nahtlos von einem
-akademischen MVP (Minimum Viable Product) zu einer vollwertigen Startup-Anwendung skaliert
-werden kann.
-
 ## Aktuelles ER-Diagramm
-
-Quelle: aktuelles Prisma-Schema in prisma/schema.prisma.
 
 ```mermaid
 erDiagram
@@ -66,14 +59,14 @@ erDiagram
 
 ## Entitäten und Regeln
 
-- AppProfile ist die zentrale Entitaet fuer Benutzerprofil und Basisstatus.
+- AppProfile ist die zentrale Entität für Benutzerprofil und Basisstatus.
 - TrackingConfig ist 1:1 optional zu AppProfile (per unique profile_id).
 - ProfileAvatar ist 1:1 optional zu AppProfile (per unique profile_id).
 - ScreentimeLog ist 1:n zu AppProfile.
-- Fuer ScreentimeLog gilt zusaetzlich ein Unique-Constraint auf (profile_id, log_date).
+- Für ScreentimeLog gilt zusätzlich ein Unique-Constraint auf (profile_id, log_date).
 
 ## Zukünftige Roadmap
 
-- Social Accountability: Implementierung einer Friendship-Entitaet (m:n) fuer gegenseitige Kontrolle.
-- Multi-Device Support: Hinzufuegen einer Device-Entitaet, um Zeiten von iPad, iPhone und Mac zu differenzieren und zusammenzufuehren.
-- Notifications: Serverseitige Push-Benachrichtigungen, wenn Freunde ihre Limits ueberschreiten.
+- Social Accountability: Implementierung einer Friendship-Entität (m:n) für gegenseitige Kontrolle.
+- Multi-Device Support: Hinzufuegen einer Device-Entität, um Zeiten von iPad, iPhone und Mac zu differenzieren und zusammenzuführen.
+- Notifications: Serverseitige Push-Benachrichtigungen, wenn Freunde ihre Limits überschreiten.
