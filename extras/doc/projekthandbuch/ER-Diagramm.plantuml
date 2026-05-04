@@ -23,42 +23,60 @@ hide circle
 ' evtl. Prbleme mit Kraehenfuessen vermeiden
 skinparam linetype ortho
 
-entity "Buch" {
-  * id: integer <<generated>>
+entity "APP_PROFILE" {
+  * id: uuid <<PK>>
   --
-  * version: integer
-  * isbn: text
-  * rating: number
-  * art: text
-  * preis: number
-  * rabatt: number
-  * lieferbar: boolean
-    datum: date
-    homepage: text
-  * **titel_id**: integer <<FK>>
-    schlagwoerter: text
+  * display_name: text
+  * avatar_url: text
+  * status_message: text
+  * timezone: text
+  * current_streak: integer
+  * onboarding_completed: boolean
   * erzeugt: timestamp
   * aktualisiert: timestamp
 }
 
-entity "Titel" {
-  * id: integer <<generated>>
+entity "TRACKING_CONFIG" {
+  * id: integer <<PK>>
   --
-  * titel: text
-    untertitel: text
+  * daily_limit_minutes: integer
+  * is_public: boolean
+  * notifications_enabled: boolean
+  * **profile_id**: uuid <<FK>>
+  * erzeugt: timestamp
+  * aktualisiert: timestamp
 }
 
-entity "Abbildung" {
-  * id: integer <<generated>>
+entity "PROFILE_AVATAR" {
+  * id: integer <<PK>>
   --
-  * beschriftung: text
-    contentType: text
-  * **buch_id**: integer <<FK>>
+  * file_data: bytes
+  * filename: text
+  * mimetype: text
+  * file_size_bytes: integer
+  * **profile_id**: uuid <<FK>>
+  * erzeugt: timestamp
+  * aktualisiert: timestamp
 }
 
-Buch ||..|| Titel
-Buch ||..o{ Abbildung
+entity "SCREENTIME_LOG" {
+  * id: integer <<PK>>
+  --
+  * log_date: date
+  * total_minutes: integer
+  * top_app: text
+  * **profile_id**: uuid <<FK>>
+  * erzeugt: timestamp
+  * aktualisiert: timestamp
+}
 
-footer (c) Jürgen Zimmermann
+' Beziehungen
+APP_PROFILE ||..o| TRACKING_CONFIG
+APP_PROFILE ||..o| PROFILE_AVATAR
+APP_PROFILE ||..o{ SCREENTIME_LOG
+
+' Hinweis: Unique-Constraint auf (profile_id, log_date) fuer SCREENTIME_LOG
+
+footer (c) TimeTether
 
 @enduml
