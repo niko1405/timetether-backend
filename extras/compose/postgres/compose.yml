@@ -35,9 +35,9 @@ services:
     # ggf. "-c max_connections=10" statt 100
     command: ["-c", "ssl=on"]
     volumes:
-      - pg_data_tt:/var/lib/postgresql/18/data
-      - pg_tablespace_tt:/tablespace
-      - pg_init_tt:/init:ro
+      - pg_data_reclaim:/var/lib/postgresql/18/data
+      - pg_tablespace_reclaim:/tablespace
+      - pg_init_reclaim:/init:ro
       # UNIX-Socket .s.PGSQL.5432.lock
       #- pg_run:/tmp
     # https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables
@@ -83,14 +83,14 @@ secrets:
     file: ./password.txt
 
 volumes:
-  pg_data_tt:
-    name: pg_data_tt
+  pg_data_reclaim:
+    name: pg_data_reclaim
     external: true
-  pg_tablespace_tt:
-    name: pg_tablespace_tt
+  pg_tablespace_reclaim:
+    name: pg_tablespace_reclaim
     external: true
-  pg_init_tt:
-    name: pg_init_tt
+  pg_init_reclaim:
+    name: pg_init_reclaim
     external: true
 
 networks:

@@ -77,6 +77,6 @@ APP_PROFILE ||..o{ SCREENTIME_LOG
 
 ' Hinweis: Unique-Constraint auf (profile_id, log_date) fuer SCREENTIME_LOG
 
-footer (c) TimeTether
+footer (c) reclaim
 
 @enduml

@@ -13,19 +13,19 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
--- Aufruf:   psql --dbname=postgres --username=postgres --file=/init/timetether/sql/create-db.sql
+-- Aufruf:   psql --dbname=postgres --username=postgres --file=/init/reclaim/sql/create-db.sql
 
 -- https://www.postgresql.org/docs/current/sql-createuser.html
 -- https://www.postgresql.org/docs/current/sql-createrole.html
-CREATE USER timetether PASSWORD 'p';
+CREATE USER reclaim PASSWORD 'p';
 
 -- https://www.postgresql.org/docs/current/sql-createdatabase.html
-CREATE DATABASE timetether;
+CREATE DATABASE reclaim;
 
 -- https://www.postgresql.org/docs/current/role-attributes.html
 -- https://www.postgresql.org/docs/current/ddl-priv.html
 -- https://www.postgresql.org/docs/current/sql-grant.html
-GRANT ALL ON DATABASE timetether TO timetether;
+GRANT ALL ON DATABASE reclaim TO reclaim;
 
 -- https://www.postgresql.org/docs/current/sql-createtablespace.html
-CREATE TABLESPACE timetetherspace OWNER timetether LOCATION '/tablespace/timetether';
+CREATE TABLESPACE reclaimspace OWNER reclaim LOCATION '/tablespace/reclaim';

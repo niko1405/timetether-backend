@@ -51,9 +51,9 @@ Zunächst werden _Named Volumes_ in Docker eingerichtet für
 - Zertifikat und privater Schlüssel für TLS.
 
 ```shell
-    docker volume create pg_data_tt
-    docker volume create pg_tablespace_tt
-    docker volume create pg_init_tt
+    docker volume create pg_data_reclaim
+    docker volume create pg_tablespace_reclaim
+    docker volume create pg_init_reclaim
 ```
 
 Für Details zu Volumes siehe https://docs.docker.com/engine/storage/volumes.
@@ -70,28 +70,28 @@ Berechtigung zum Ändern vom Linux-Owner und von der Linux-Group (s.u.).
 ```shell
     # Windows
     cd extras\compose\postgres
-    docker run -v pg_init_tt:/init -v pg_tablespace_tt:/tablespace -v ./init:/tmp/init:ro `
+    docker run -v pg_init_reclaim:/init -v pg_tablespace_reclaim:/tablespace -v ./init:/tmp/init:ro `
       --rm -it -u 0 --entrypoint '' dhi.io/postgres:18.3-debian13 /bin/bash
 
     # macOS
     cd extras/compose/postgres
-    docker run -v pg_init_tt:/init -v pg_tablespace_tt:/tablespace -v ./init:/tmp/init:ro \
+    docker run -v pg_init_reclaim:/init -v pg_tablespace_reclaim:/tablespace -v ./init:/tmp/init:ro \
     --rm -it -u 0 --entrypoint '' dhi.io/postgres:18.3-debian13 /bin/bash
 ```
 
 Um die SQL-Skripte sowie Zertifikat und privater Schlüssel für TLS aus dem
-Original-Verzeichnis `init\timetether\sql` bzw. `init\timetether\tls` in das Named Volume
-`pg_init_tt` kopieren zu können, wurde das lokale Verzeichnis `.\init` in `/tmp/init`
+Original-Verzeichnis `init\reclaim\sql` bzw. `init\reclaim\tls` in das Named Volume
+`pg_init_reclaim` kopieren zu können, wurde das lokale Verzeichnis `.\init` in `/tmp/init`
 bereitgestellt. In der _bash_ werden deshalb die SQL-Skripte sowie Zertifikat und
 privater Schlüssel aus dem Verzeichnis `/tmp/init` nach `/init` und deshalb in
-das Named Volume `pg_init_tt` kopiert. Danach wird das Verzeichnis `/tablespace/timetether`
-angelegt, welches im Named Volume `pg_tablespace_tt` liegt. Jetzt wird bei den Dateien
+das Named Volume `pg_init_reclaim` kopiert. Danach wird das Verzeichnis `/tablespace/reclaim`
+angelegt, welches im Named Volume `pg_tablespace_reclaim` liegt. Jetzt wird bei den Dateien
 der Owner und die Gruppe auf `postgres` gesetzt sowie die Zugriffsrechte auf Oktal
 `400`, d.h. nur der Owner hat Leserechte.
 
 ```shell
     cp -r /tmp/init/* /init
-    mkdir /tablespace/timetether
+    mkdir /tablespace/reclaim
     chown -R postgres:postgres /init /tablespace
     chmod 400 /init/*/sql/* /init/tls/*
     ls -lR /init
@@ -115,7 +115,7 @@ Docker-Container gestartet
 ```
 
 Nachdem in der ersten Shell der Server erfolgreich gestartet und initialisiert
-ist, werden `server.crt` und `server.key` aus dem Named Volume `pg_init_tt`, d.h.
+ist, werden `server.crt` und `server.key` aus dem Named Volume `pg_init_reclaim`, d.h.
 aus dem Verzeichnis `/init/tls`, in das Verzeichnis `/var/lib/postgresql/18/data`
 kopiert. Danach wird der Server bzw. Container wieder heruntergefahren, da er
 noch ohne TLS läuft.
@@ -136,18 +136,18 @@ jetzt mit TLS:
 ```
 
 In der 2. Shell werden die beiden SQL-Skripte ausgeführt, um zunächst eine neue
-DB `timetether` mit dem DB-User `timetether`anzulegen. Mit dem 2. Skript wird das Schema
-`timetether` mit dem DB-User `timetether` als _Owner_ angelegt. Abschließend werden die
+DB `reclaim` mit dem DB-User `reclaim`anzulegen. Mit dem 2. Skript wird das Schema
+`reclaim` mit dem DB-User `reclaim` als _Owner_ angelegt. Abschließend werden die
 Tabellen angelegt und mit Testdaten aus den CSV-Dateien aus dem Verzeichnis
-`/init/timetether/csv` im Named Volume `pg_init_tt` gefüllt.
+`/init/reclaim/csv` im Named Volume `pg_init_reclaim` gefüllt.
 
 ```shell
     docker compose exec db bash
-        psql --dbname=postgres --username=postgres --file=/init/timetether/sql/create-db.sql
-        psql --dbname=timetether --username=timetether --file=/init/timetether/sql/create-schema.sql
+        psql --dbname=postgres --username=postgres --file=/init/reclaim/sql/create-db.sql
+        psql --dbname=reclaim --username=reclaim --file=/init/reclaim/sql/create-schema.sql
 
-        psql --dbname=timetether --username=timetether --file=/init/timetether/sql/create-table.sql
-        psql --dbname=timetether --username=postgres --file=/init/timetether/sql/copy-csv.sql
+        psql --dbname=reclaim --username=reclaim --file=/init/reclaim/sql/create-table.sql
+        psql --dbname=reclaim --username=postgres --file=/init/reclaim/sql/copy-csv.sql
         exit
     docker compose down
 ```
@@ -256,7 +256,7 @@ Für VS Code gibt übrigens auch folgende Erweiterungen:
 
 ### Konfiguration
 
-Mit der Erweiterung _PostgreSQL_ für VS Code kann man die Datenbank `timetether` und
+Mit der Erweiterung _PostgreSQL_ für VS Code kann man die Datenbank `reclaim` und
 deren Daten verwalten. Man klickt man auf _+ Verbindung hinzufügen_
 und gibt beim Karteireiter _Parameter_ folgende Werte ein:
 
@@ -278,9 +278,9 @@ gibt folgende Werte ein:
 Jetzt den modalen Dialog schließen, d.h. rechts oben auf _X_ klicken, und danach
 den Button _Verbindung testen_ anklicken. Wenn dann im Button ein Haken erscheint,
 kann man den anderen Button _Save & Connect_ anklicken, um die Verbindung zu speichern.
-Im Untermenü _Databases_ von der Verbindung sieht man dann z.B. die Datenbank `timetether`
-mit dem gleichnamigen Schema `timetether` und die Datenbank `postgres`.
-Ebenso kann man man unter _Roles_ den DB-User `timetether` und den Superuser `postgres`
+Im Untermenü _Databases_ von der Verbindung sieht man dann z.B. die Datenbank `reclaim`
+mit dem gleichnamigen Schema `reclaim` und die Datenbank `postgres`.
+Ebenso kann man man unter _Roles_ den DB-User `reclaim` und den Superuser `postgres`
 sehen sowie bei _Tablespaces_ den Default-Tablespace `pg_default` und den
 eigenen Tablespace.
 
@@ -296,10 +296,10 @@ Danach im Chat-Fenster Fragen stellen und ggf. nachhaken, z.B.:
 
 - Wie kann ich Bücher mit einem "a" im Titel selektieren?
 - Ich möchte die Daten der Bücher und nicht den Untertitel.
-- Jetzt fehlt aber der timetethertitel.
+- Jetzt fehlt aber der reclaimtitel.
 - Wie kann ich diese Daten als CSV exportieren?
 
 **BEACHTE**:
 
-- _Bücher_ mit deutschem Umlaut als Plural der DB-Tabelle `timetether`.
+- _Bücher_ mit deutschem Umlaut als Plural der DB-Tabelle `reclaim`.
 - Es wird auch erkannt, dass `ILIKE` anstelle von `=` benutzt werden soll.

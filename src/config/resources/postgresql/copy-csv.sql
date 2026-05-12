@@ -13,11 +13,11 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
--- Aufruf:   psql --dbname=timetether --username=postgres --file=/init/timetether/sql/copy-csv.sql
+-- Aufruf:   psql --dbname=reclaim --username=postgres --file=/init/reclaim/sql/copy-csv.sql
 
-SET search_path TO timetether;
+SET search_path TO reclaim;
 
 -- https://www.postgresql.org/docs/current/sql-copy.html
-COPY buch FROM '/init/timetether/csv/timetether.csv' (FORMAT csv, DELIMITER ';', HEADER true);
-COPY titel FROM '/init/timetether/csv/titel.csv' (FORMAT csv, DELIMITER ';', HEADER true);
-COPY abbildung FROM '/init/timetether/csv/abbildung.csv' (FORMAT csv, DELIMITER ';', HEADER true);
+COPY buch FROM '/init/reclaim/csv/reclaim.csv' (FORMAT csv, DELIMITER ';', HEADER true);
+COPY titel FROM '/init/reclaim/csv/titel.csv' (FORMAT csv, DELIMITER ';', HEADER true);
+COPY abbildung FROM '/init/reclaim/csv/abbildung.csv' (FORMAT csv, DELIMITER ';', HEADER true);

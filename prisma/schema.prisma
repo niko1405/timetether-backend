@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["timetether"]
+  schemas  = ["reclaim"]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -28,7 +28,7 @@ model AppProfile {
   trackingConfig      TrackingConfig?  
 
   @@map("app_profile")
-  @@schema("timetether") // <-- Hier hinzugefügt
+  @@schema("reclaim") // <-- Hier hinzugefügt
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -48,7 +48,7 @@ model ProfileAvatar {
 
   @@index([profileId])
   @@map("profile_avatar")
-  @@schema("timetether") // <-- Hier hinzugefügt
+  @@schema("reclaim") // <-- Hier hinzugefügt
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -68,7 +68,7 @@ model ScreentimeLog {
   @@unique([profileId, logDate])
   @@index([profileId])
   @@map("screentime_log")
-  @@schema("timetether") // <-- Hier hinzugefügt
+  @@schema("reclaim") // <-- Hier hinzugefügt
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -86,5 +86,5 @@ model TrackingConfig {
   appProfile           AppProfile @relation(fields: [profileId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   
   @@map("tracking_config")
-  @@schema("timetether") // <-- Hier hinzugefügt
+  @@schema("reclaim") // <-- Hier hinzugefügt
 }

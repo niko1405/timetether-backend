@@ -1,6 +1,6 @@
-# TimeTether Backend
+# Reclaim Backend
 
-TimeTether ist ein Backend-Service fuer eine geraeteuebergreifende Screen-Time-Tracking-App.
+Reclaim ist ein Backend-Service fuer eine geraeteuebergreifende Screen-Time-Tracking-App.
 Die Kernidee ist es, nicht nur die eigene Bildschirmzeit zu erfassen, sondern diese Daten
 (kontrolliert) mit Freunden zu teilen, um sich gegenseitig bei der Reduzierung der Handy-Nutzung
 zu unterstuetzen.

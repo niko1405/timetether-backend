@@ -13,11 +13,12 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
--- Aufruf:   psql --dbname=timetether --username=postgres --file=/init/timetether/sql/copy-csv.sql
+-- Aufruf:   psql --dbname=reclaim --username=reclaim --file=/init/reclaim/sql/create-schema.sql
 
-SET search_path TO timetether;
+-- https://www.postgresql.org/docs/devel/app-psql.html
+-- https://www.postgresql.org/docs/current/ddl-schemas.html
+-- https://www.postgresql.org/docs/current/ddl-schemas.html#DDL-SCHEMAS-CREATE
+-- "user-private schema" (Default-Schema: public)
+CREATE SCHEMA IF NOT EXISTS AUTHORIZATION reclaim;
 
--- https://www.postgresql.org/docs/current/sql-copy.html
-COPY app_profile FROM '/init/timetether/csv/app_profile.csv' (FORMAT csv, DELIMITER ';', HEADER true);
-COPY screentime_log FROM '/init/timetether/csv/screentime_log.csv' (FORMAT csv, DELIMITER ';', HEADER true);
-COPY tracking_config FROM '/init/timetether/csv/tracking_config.csv' (FORMAT csv, DELIMITER ';', HEADER true);
+ALTER ROLE reclaim SET search_path = 'reclaim';

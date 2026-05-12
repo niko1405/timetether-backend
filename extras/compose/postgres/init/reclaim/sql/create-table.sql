@@ -13,7 +13,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
--- Aufruf:   psql --dbname=timetether --username=timetether --file=/init/timetether/sql/create-table.sql
+-- Aufruf:   psql --dbname=reclaim --username=reclaim --file=/init/reclaim/sql/create-table.sql
 
 -- text statt varchar(n):
 -- "There is no performance difference among these three types, apart from a few extra CPU cycles
@@ -21,24 +21,24 @@
 -- ggf. CHECK(char_length(nachname) <= 255)
 
 -- Indexe auflisten:
--- psql --dbname=timetether --username=timetether
+-- psql --dbname=reclaim --username=reclaim
 --  SELECT   tablename, indexname, indexdef, tablespace
 --  FROM     pg_indexes
---  WHERE    schemaname = 'timetether'
+--  WHERE    schemaname = 'reclaim'
 --  ORDER BY tablename, indexname;
 --  \q
 
 -- https://www.postgresql.org/docs/current/manage-ag-tablespaces.html
-SET default_tablespace = timetetherspace;
+SET default_tablespace = reclaimspace;
 
 -- https://www.postgresql.org/docs/current/app-psql.html
 -- https://www.postgresql.org/docs/current/ddl-schemas.html
 -- https://www.postgresql.org/docs/current/ddl-schemas.html#DDL-SCHEMAS-CREATE
 -- "user-private schema" (Default-Schema: public)
-CREATE SCHEMA IF NOT EXISTS AUTHORIZATION timetether;
+CREATE SCHEMA IF NOT EXISTS AUTHORIZATION reclaim;
 
-ALTER ROLE timetether SET search_path = 'timetether';
-set search_path to 'timetether';
+ALTER ROLE reclaim SET search_path = 'reclaim';
+set search_path to 'reclaim';
 
 CREATE TABLE IF NOT EXISTS app_profile (
                   -- Keycloak Subject-ID (UUID), daher kein auto-increment Integer
