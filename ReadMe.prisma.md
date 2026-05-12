@@ -247,19 +247,19 @@ gesetzt sein:
 
 ```shell
     # Windows:
-    $env:DATABASE_URL='postgresql://timetether:p@localhost/timetether?schema=timetether&connection_limit=10&sslnegotiation=direct?sslcert=src/config/resources/postgresql/server.crt'
+    $env:DATABASE_URL='postgresql://reclaim:p@localhost/reclaim?schema=reclaim&connection_limit=10&sslnegotiation=direct?sslcert=src/config/resources/postgresql/server.crt'
 
     # macOS:
-    DATABASE_URL='postgresql://timetether:p@localhost/timetether?schema=timetether&connection_limit=10&sslnegotiation=direct?sslcert=src/config/resources/postgresql/server.crt'
+    DATABASE_URL='postgresql://reclaim:p@localhost/reclaim?schema=reclaim&connection_limit=10&sslnegotiation=direct?sslcert=src/config/resources/postgresql/server.crt'
 ```
 
 Dadurch ist folgendes konfiguriert:
 
-- Benutzername: `timetether`
+- Benutzername: `reclaim`
 - Passwort: `p`
 - DB-Host: `localhost`
-- DB-Name: `timetether`
-- Schema: `timetether`
+- DB-Name: `reclaim`
+- Schema: `reclaim`
 - Größe des Verbindungs-Pools: max. `10` Verbindungen
 - SSL: durch die Zertifikatsdatei `server.crt` im Verzeichnis `src\config\resources\postgresql`
 
@@ -340,7 +340,7 @@ eingetragen werden:
   ...
   datasource db {
     provider = "postgresql"
-    schemas  = ["timetether"]
+    schemas  = ["reclaim"]
   }
 ```
 
@@ -378,7 +378,7 @@ try {
 }
 ```
 
-Der obige Prisma-Client `prisma.timetether` greift auf die Tabelle `buch` in der
+Der obige Prisma-Client `prisma.reclaim` greift auf die Tabelle `buch` in der
 konfigurierten PostgreSQL-DB zu. Dabei werden die npm-Packages _@prisma/client_
 und _@prisma/adapter-pg_ verwendet, die in `package.json` als `dependency`
 eingetragen sind. @prisma/adapter-pg wiederum verwendet intern das npm-Package
@@ -426,14 +426,14 @@ und auch auf Sicherheitslücken überprüft werden:
 Während die Erweiterung _PostgreSQL_ für VS Code nur Daten anzeigen kann, kann
 _Prisma Studio_ auch Daten einfügen, ändern und löschen. Der Aufruf mit _Bun_
 lautet folgendermaßen, wobei man an der Oberfläche von Prisma Studio noch das
-Schema `timetether` auswählen muss, um die Tabellen anzuzeigen:
+Schema `reclaim` auswählen muss, um die Tabellen anzuzeigen:
 
 ```shell
     # Windows:
-    $env:DATABASE_URL='postgresql://timetether:p@localhost/timetether'
+    $env:DATABASE_URL='postgresql://reclaim:p@localhost/reclaim'
 
     # macOS / Linux:
-    DATABASE_URL='postgresql://timetether:p@localhost/timetether'
+    DATABASE_URL='postgresql://reclaim:p@localhost/reclaim'
 
     bunx prisma studio
 ```

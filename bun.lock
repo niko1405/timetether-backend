@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "timetether",
+      "name": "reclaim",
       "dependencies": {
         "@prisma/adapter-pg": "7.7.0",
         "@prisma/client": "7.7.0",

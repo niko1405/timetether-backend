@@ -45,7 +45,7 @@ const log: (Prisma.LogLevel | Prisma.LogDefinition)[] = [
     'error',
 ];
 
-// PrismaClient fuer DB "timetether" (siehe Umgebungsvariable DATABASE_URL in ".env")
+// PrismaClient fuer DB "reclaim" (siehe Umgebungsvariable DATABASE_URL in ".env")
 const prisma = new PrismaClient({
     adapter,
     errorFormat: 'pretty',

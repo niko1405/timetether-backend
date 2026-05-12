@@ -52,7 +52,7 @@ const log: (Prisma.LogLevel | Prisma.LogDefinition)[] = [
 ];
 
 // PrismaClient passend zur Umgebungsvariable DATABASE_URL in ".env"
-// d.h. mit PostgreSQL-User fuer Schema "timetether"
+// d.h. mit PostgreSQL-User fuer Schema "reclaim"
 const prisma = new PrismaClient({
     // shorthand property
     adapter,
