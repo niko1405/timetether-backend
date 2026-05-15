@@ -40,5 +40,8 @@
   "asciidoc.antora.showEnableAntoraPrompt": false,
   "vitest.nodeEnv": {
     "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }
