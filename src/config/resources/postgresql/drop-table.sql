@@ -15,16 +15,13 @@
 
 -- Aufruf:
 -- docker compose exec db bash
--- psql --dbname=buch --username=buch --file=/sql/drop-table.sql
+-- psql --dbname=reclaim --username=reclaim --file=/sql/drop-table.sql
 
-set search_path to 'buch';
+set search_path to 'reclaim';
 
 -- https://www.postgresql.org/docs/current/sql-droptable.html
 
-DROP TABLE IF EXISTS buch_file CASCADE;
-DROP TABLE IF EXISTS abbildung CASCADE;
-DROP TABLE IF EXISTS titel CASCADE;
-DROP TABLE IF EXISTS buch CASCADE;
-
--- https://www.postgresql.org/docs/current/sql-droptype.html
-DROP TYPE IF EXISTS buchart;
+DROP TABLE IF EXISTS profile_avatar CASCADE;
+DROP TABLE IF EXISTS screentime_log CASCADE;
+DROP TABLE IF EXISTS tracking_config CASCADE;
+DROP TABLE IF EXISTS app_profile CASCADE;

@@ -13,7 +13,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
--- Aufruf:   psql --dbname=buch --username=buch --file=/init/buch/sql/create-table.sql
+-- Aufruf:   psql --dbname=reclaim --username=reclaim --file=/init/reclaim/sql/create-table.sql
 
 -- text statt varchar(n):
 -- "There is no performance difference among these three types, apart from a few extra CPU cycles
@@ -21,85 +21,97 @@
 -- ggf. CHECK(char_length(nachname) <= 255)
 
 -- Indexe auflisten:
--- psql --dbname=buch --username=buch
+-- psql --dbname=reclaim --username=reclaim
 --  SELECT   tablename, indexname, indexdef, tablespace
 --  FROM     pg_indexes
---  WHERE    schemaname = 'buch'
+--  WHERE    schemaname = 'reclaim'
 --  ORDER BY tablename, indexname;
 --  \q
 
 -- https://www.postgresql.org/docs/current/manage-ag-tablespaces.html
-SET default_tablespace = buchspace;
+SET default_tablespace = reclaimspace;
 
 -- https://www.postgresql.org/docs/current/app-psql.html
 -- https://www.postgresql.org/docs/current/ddl-schemas.html
 -- https://www.postgresql.org/docs/current/ddl-schemas.html#DDL-SCHEMAS-CREATE
 -- "user-private schema" (Default-Schema: public)
-CREATE SCHEMA IF NOT EXISTS AUTHORIZATION buch;
+CREATE SCHEMA IF NOT EXISTS AUTHORIZATION reclaim;
 
-ALTER ROLE buch SET search_path = 'buch';
-set search_path to 'buch';
+ALTER ROLE reclaim SET search_path = 'reclaim';
+set search_path to 'reclaim';
 
--- https://www.postgresql.org/docs/current/sql-createtype.html
--- https://www.postgresql.org/docs/current/datatype-enum.html
-CREATE TYPE buchart AS ENUM ('EPUB', 'HARDCOVER', 'PAPERBACK');
+ /* TODO Attribut Version hinzufügen. */
 
--- https://www.postgresql.org/docs/current/sql-createtable.html
--- https://www.postgresql.org/docs/current/datatype.html
-CREATE TABLE IF NOT EXISTS buch (
-                  -- https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-INT
-                  -- https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-PRIMARY-KEYS
-                  -- impliziter Index fuer Primary Key
-                  -- "GENERATED ALWAYS AS IDENTITY" gemaess SQL-Standard
-                  -- entspricht SERIAL mit generierter Sequenz buch_id_seq
-    id            integer GENERATED ALWAYS AS IDENTITY(START WITH 1000) PRIMARY KEY,
-                  -- https://www.postgresql.org/docs/current/ddl-constraints.html#id-1.5.4.6.6
-    version       integer NOT NULL DEFAULT 0,
-                  -- impliziter Index als B-Baum durch UNIQUE
-                  -- https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS
-    isbn          text NOT NULL UNIQUE,
+CREATE TABLE IF NOT EXISTS app_profile (
+                  -- Keycloak Subject-ID (UUID), daher kein auto-increment Integer
+                  -- https://www.postgresql.org/docs/current/datatype-uuid.html
+    id                   uuid PRIMARY KEY,
+    display_name         text NOT NULL,
+    avatar_url           text,
+    status_message       text,
+    timezone             text NOT NULL DEFAULT 'Europe/Berlin',
                   -- https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-CHECK-CONSTRAINTS
-                  -- https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-POSIX-REGEXP
-    rating        integer NOT NULL CHECK (rating >= 0 AND rating <= 5),
-    art           buchart,
-                  -- https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-NUMERIC-DECIMAL
-                  -- 10 Stellen, davon 2 Nachkommastellen
-    preis         decimal(8,2) NOT NULL,
-    rabatt        decimal(4,3) NOT NULL,
+    current_streak       integer NOT NULL DEFAULT 0 CHECK (current_streak >= 0),
                   -- https://www.postgresql.org/docs/current/datatype-boolean.html
-    lieferbar     boolean NOT NULL DEFAULT FALSE,
+    onboarding_completed boolean NOT NULL DEFAULT FALSE,
                   -- https://www.postgresql.org/docs/current/datatype-datetime.html
-    datum         date,
-    homepage      text,
-                  -- https://www.postgresql.org/docs/current/datatype-json.html
-    schlagwoerter jsonb,
+    erzeugt              timestamp NOT NULL DEFAULT NOW(),
+    aktualisiert         timestamp NOT NULL DEFAULT NOW()
+);
+
+
+CREATE TABLE IF NOT EXISTS tracking_config (
+                  -- https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-INT
+                  -- "GENERATED ALWAYS AS IDENTITY" gemaess SQL-Standard
+    id                    integer GENERATED ALWAYS AS IDENTITY(START WITH 1000) PRIMARY KEY,
+    daily_limit_minutes   integer NOT NULL DEFAULT 120 CHECK (daily_limit_minutes > 0),
+    is_public             boolean NOT NULL DEFAULT FALSE,
+    notifications_enabled boolean NOT NULL DEFAULT TRUE,
+                  -- https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK
+                  -- 1:1 Beziehung durch UNIQUE Constraint auf den Foreign Key
+    profile_id            uuid NOT NULL UNIQUE REFERENCES app_profile ON DELETE CASCADE,
+    erzeugt               timestamp NOT NULL DEFAULT NOW(),
+    aktualisiert          timestamp NOT NULL DEFAULT NOW()
+);
+
+
+CREATE TABLE IF NOT EXISTS screentime_log (
+    id                    integer GENERATED ALWAYS AS IDENTITY(START WITH 1000) PRIMARY KEY,
                   -- https://www.postgresql.org/docs/current/datatype-datetime.html
-    erzeugt       timestamp NOT NULL DEFAULT NOW(),
-    aktualisiert  timestamp NOT NULL DEFAULT NOW()
+    log_date              date NOT NULL,
+                  -- Ein Tag hat maximal 1440 Minuten
+    total_minutes         integer NOT NULL CHECK (total_minutes >= 0 AND total_minutes <= 1440),
+    top_app               text,
+                  -- 1:n Beziehung (ohne UNIQUE, da ein Profil viele Logs hat)
+    profile_id            uuid NOT NULL REFERENCES app_profile ON DELETE CASCADE,
+    erzeugt               timestamp NOT NULL DEFAULT NOW(),
+    aktualisiert          timestamp NOT NULL DEFAULT NOW(),
+                  -- Verhindert, dass für denselben Nutzer am selben Tag zwei Einträge entstehen
+    UNIQUE (profile_id, log_date)
 );
 
-CREATE TABLE IF NOT EXISTS titel (
-    id          integer GENERATED ALWAYS AS IDENTITY(START WITH 1000) PRIMARY KEY,
-    titel       text NOT NULL,
-    untertitel  text,
-                -- https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK
-    buch_id     integer NOT NULL UNIQUE REFERENCES buch ON DELETE CASCADE
-);
+-- Implizite Indizes entstehen nur bei PRIMARY KEY und UNIQUE. 
+-- Für normale Foreign Keys zur Beschleunigung von JOINs legen wir sie explizit an:
+CREATE INDEX IF NOT EXISTS screentime_log_profile_id_idx ON screentime_log(profile_id);
 
-
-CREATE TABLE IF NOT EXISTS abbildung (
+CREATE TABLE IF NOT EXISTS profile_avatar (
+                  -- Wie in deiner Vorlage: Standard-konforme ID-Generierung
     id              integer GENERATED ALWAYS AS IDENTITY(START WITH 1000) PRIMARY KEY,
-    beschriftung    text NOT NULL,
-    content_type    text NOT NULL,
-    buch_id         integer NOT NULL REFERENCES buch ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS abbildung_buch_id_idx ON abbildung(buch_id);
-
-CREATE TABLE IF NOT EXISTS buch_file (
-    id              integer GENERATED ALWAYS AS IDENTITY(START WITH 1000) PRIMARY KEY,
-    data            bytea NOT NULL,
+                  -- https://www.postgresql.org/docs/current/datatype-binary.html
+                  -- Speichert die rohen Bilddaten als Binärstring in der Datenbank
+    file_data       bytea NOT NULL,
     filename        text NOT NULL,
-    mimetype        text,
-    buch_id         integer NOT NULL UNIQUE REFERENCES buch ON DELETE CASCADE
+                  -- Erweitert um einen CHECK, damit nur echte Bilder hochgeladen werden
+    mimetype        text NOT NULL CHECK (mimetype IN ('image/jpeg', 'image/png', 'image/webp')),
+                  -- Dateigröße in Bytes (hilfreich für spätere Quota-Limits)
+    file_size_bytes integer NOT NULL CHECK (file_size_bytes > 0),
+                  -- https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK
+                  -- UNIQUE garantiert die 1:1-Beziehung: Ein Profil hat maximal ein Avatar-Bild
+    profile_id      uuid NOT NULL UNIQUE REFERENCES app_profile ON DELETE CASCADE,
+                  -- Zeitstempel
+    erzeugt         timestamp NOT NULL DEFAULT NOW(),
+    aktualisiert    timestamp NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS buch_file_buch_id_idx ON buch_file(buch_id);
+
+-- Index für den Foreign Key (wichtig für schnelle Ladezeiten beim Profilaufruf)
+CREATE INDEX IF NOT EXISTS profile_avatar_profile_id_idx ON profile_avatar(profile_id);

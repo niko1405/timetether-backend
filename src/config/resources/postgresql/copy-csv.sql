@@ -18,6 +18,6 @@
 SET search_path TO reclaim;
 
 -- https://www.postgresql.org/docs/current/sql-copy.html
-COPY buch FROM '/init/reclaim/csv/reclaim.csv' (FORMAT csv, DELIMITER ';', HEADER true);
-COPY titel FROM '/init/reclaim/csv/titel.csv' (FORMAT csv, DELIMITER ';', HEADER true);
-COPY abbildung FROM '/init/reclaim/csv/abbildung.csv' (FORMAT csv, DELIMITER ';', HEADER true);
+COPY app_profile FROM '/init/reclaim/csv/app_profile.csv' (FORMAT csv, DELIMITER ';', HEADER true);
+COPY screentime_log FROM '/init/reclaim/csv/screentime_log.csv' (FORMAT csv, DELIMITER ';', HEADER true);
+COPY tracking_config FROM '/init/reclaim/csv/tracking_config.csv' (FORMAT csv, DELIMITER ';', HEADER true);
